@@ -38,6 +38,12 @@
 - **Temporary workaround**: Treat this ignore rule as a temporary solution while we experiment; we may later replace the raw file with a smaller derived version that can be tracked.
 - **Future direction**: Still planning to create a smaller, downsampled version of the large test CSV, since we do not need the full dataset for current accuracy experiments.
 
+#### 2025-11-29 – WELFake sample preparation script
+
+- **Sample script created**: Added `scripts/prepare_welfake_sample.py` that extracts the first 1,000 rows from the large WELFake CSV and saves to `test-data/WELFake_Dataset_sample_1000.csv`.
+- **Script location**: Placed in `scripts/` directory for organization and clarity.
+- **Documentation**: Script includes comments explaining that it assumes developers have the original large CSV locally, so reviewers can see exactly how the large CSV was processed.
+
 ### Project summary
 
 - **Goal**: Build a model to classify news articles as fake or real.
@@ -49,7 +55,8 @@
   - `training-data/True.csv`
 - **Test data location**:
   - `test-data/fake.csv`
-  - An additional, very large CSV file we found for extra test data (not yet fully integrated).
+  - `test-data/WELFake_Dataset_sample_1000.csv` (sample of 1,000 rows from the large WELFake dataset, created via `scripts/prepare_welfake_sample.py`)
+  - An additional, very large CSV file (`test-data/WELFake_Dataset.csv`) available locally but not tracked in git.
 - **Work in progress**: We’ve mainly been deciding where to store training vs. test CSV files and adjusting the project layout to keep this organized.
 
 ### Challenges
@@ -71,9 +78,3 @@
   - Notes on model performance and accuracy.
   - Ideas for improving data organization or preprocessing.
   - Decision on whether to keep ignoring the original huge CSV file or replace it with a smaller, tracked subset file.
-  - **TODO (partner)**: Write a `scripts/prepare_welfake_sample.py` (or similar) script that:
-    - Assumes each developer has the original large WELFake CSV locally.
-    - Cleans/reduces that CSV by taking (for now) the first 1,000 rows.
-    - Saves the result as a smaller CSV in `test-data/` to be used as test data.
-    - Keeps the script in the repo so reviewers can see exactly how the large CSV was processed.
-
