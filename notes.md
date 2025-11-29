@@ -71,4 +71,9 @@
   - Notes on model performance and accuracy.
   - Ideas for improving data organization or preprocessing.
   - Decision on whether to keep ignoring the original huge CSV file or replace it with a smaller, tracked subset file.
+  - **TODO (partner)**: Write a `scripts/prepare_welfake_sample.py` (or similar) script that:
+    - Assumes each developer has the original large WELFake CSV locally.
+    - Cleans/reduces that CSV by taking (for now) the first 1,000 rows.
+    - Saves the result as a smaller CSV in `test-data/` to be used as test data.
+    - Keeps the script in the repo so reviewers can see exactly how the large CSV was processed.
 
