@@ -32,6 +32,12 @@
 - **Large external CSV**: Identified that the extra test CSV is too large to use fully for quick experiments.
 - **Plan for sampling**: Agreed that the first step is to clean and downsample the large external test CSV into a smaller, representative sample to quickly evaluate fake vs. real classification accuracy.
 
+#### 2025-11-29 – `.gitignore` for large test CSV
+
+- **Ignore huge CSV**: Added `test-data/WELFake_Dataset.csv` to `.gitignore` so the very large test CSV is not tracked by git, improving push/pull performance.
+- **Temporary workaround**: Treat this ignore rule as a temporary solution while we experiment; we may later replace the raw file with a smaller derived version that can be tracked.
+- **Future direction**: Still planning to create a smaller, downsampled version of the large test CSV, since we do not need the full dataset for current accuracy experiments.
+
 ### Project summary
 
 - **Goal**: Build a model to classify news articles as fake or real.
@@ -64,4 +70,5 @@
   - Possible sampling strategies for the large test CSV.
   - Notes on model performance and accuracy.
   - Ideas for improving data organization or preprocessing.
+  - Decision on whether to keep ignoring the original huge CSV file or replace it with a smaller, tracked subset file.
 
