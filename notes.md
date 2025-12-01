@@ -67,6 +67,18 @@
 - **Documentation**: Both scripts include comprehensive docstrings explaining purpose, parameters, return values, examples, and error handling, ensuring code readability and maintainability.
 - **Alignment with project goals**: Implements interpretable baseline models (TF-IDF + Logistic Regression/SVM) as specified in the modeling plan, serving as benchmarks against which advanced models will be compared. The evaluation function uses Macro-F1 as the primary metric as specified in the evaluation plan, supporting robust model comparison across different split strategies.
 
+#### 2025-12-01 – Embedding and transformer model modules
+
+- **Embedding-based modeling script created**: Added `scripts/05_embeddings_model.py` with utilities for sentence-embedding experiments.
+  - `build_embeddings(model_name="all-MiniLM-L6-v2")`: Loads a SentenceTransformer model for converting news articles into dense embeddings.
+  - `embed_text(embedder, texts)`: Encodes cleaned article text (e.g., `text_cleaned`) into NumPy embedding arrays suitable for downstream classifiers.
+  - `train_embedding_classifier(emb_train, y_train)`: Trains a Logistic Regression classifier on top of embeddings, using the same label convention (0=real, 1=fake) as the TF-IDF baselines so it can be evaluated with the shared `evaluate` function.
+- **Transformer-based modeling script created**: Added `scripts/06_transformer_model.py` with utilities for DistilBERT-style sequence classification.
+  - `FakeNewsDataset`: Lightweight Dataset wrapper that tokenizes articles on the fly for Hugging Face Trainer-based fine-tuning.
+  - `build_transformer()`, `tokenize(...)`, `train_transformer(...)`: Build, tokenize for, and fine-tune a transformer classifier on ISOT data, again respecting the 0=real, 1=fake label convention.
+  - `TransformerSklearnWrapper`: Sklearn-style wrapper exposing `.predict()` and `.predict_proba()` so transformer models can be passed directly into `scripts/04_baseline_eval.py::evaluate`, enabling consistent Macro-F1, PR-AUC, and ROC-AUC comparisons across TF-IDF baselines, embedding models, and transformers.
+ - **Alignment with project goals**: Implements the advanced modeling components (embeddings + transformer) called for in the proposal while keeping interfaces and label conventions compatible with existing preprocessing, splitting, and evaluation utilities, supporting robust comparisons under random, topic-holdout, and later cross-dataset settings.
+
 ### Project summary
 
 - **Goal**: Build a model to classify news articles as fake or real.
@@ -106,14 +118,14 @@
 #### Reuben – Advanced models and transfer
 
 - **Core scripts (planned)**:
-  - [ ] `05_embeddings_model.py`
-    - [ ] `build_embeddings(model_name="all-MiniLM-L6-v2")`
-    - [ ] `embed_text(embedder, texts)`
-    - [ ] `train_embedding_classifier(emb_train, y_train)`
-  - [ ] `06_transformer_model.py`
-    - [ ] `build_transformer()`
-    - [ ] `tokenize(tokenizer, texts)`
-    - [ ] `train_transformer(model, tokenizer, train_texts, train_labels)`
+  - [x] `05_embeddings_model.py`
+    - [x] `build_embeddings(model_name="all-MiniLM-L6-v2")`
+    - [x] `embed_text(embedder, texts)`
+    - [x] `train_embedding_classifier(emb_train, y_train)`
+  - [x] `06_transformer_model.py`
+    - [x] `build_transformer()`
+    - [x] `tokenize(tokenizer, texts)`
+    - [x] `train_transformer(model, tokenizer, train_texts, train_labels)`
   - [ ] `07_cross_dataset_transfer.py`
     - [ ] `load_kaggle_dataset(path)`
     - [ ] `zero_shot_test(model, X_test, y_test)`
