@@ -48,6 +48,53 @@
 
 - **Goal**: Build a model to classify news articles as fake or real.
 
+### Task distribution and status
+
+#### Junaid – Data engineering and baselines
+
+- **Core scripts (planned)**:
+  - [ ] `01_preprocessing.py`
+    - [ ] `load_isot(fake_path, real_path)`
+    - [ ] `clean_text(text)`
+    - [ ] `apply_cleaning(df)`
+  - [ ] `02_data_splitting.py`
+    - [ ] `random_split(df)`
+    - [ ] `topic_holdout_split(df, topic_column, heldout_topic)`
+  - [ ] `03_baseline_models.py`
+    - [ ] `build_tfidf()`
+    - [ ] `train_logreg(X_train, y_train)`
+    - [ ] `train_svm(X_train, y_train)`
+  - [ ] `04_baseline_eval.py`
+    - [ ] `evaluate(model, X_test, y_test, model_name="baseline")`
+
+#### Reuben – Advanced models and transfer
+
+- **Core scripts (planned)**:
+  - [ ] `05_embeddings_model.py`
+    - [ ] `build_embeddings(model_name="all-MiniLM-L6-v2")`
+    - [ ] `embed_text(embedder, texts)`
+    - [ ] `train_embedding_classifier(emb_train, y_train)`
+  - [ ] `06_transformer_model.py`
+    - [ ] `build_transformer()`
+    - [ ] `tokenize(tokenizer, texts)`
+    - [ ] `train_transformer(model, tokenizer, train_texts, train_labels)`
+  - [ ] `07_cross_dataset_transfer.py`
+    - [ ] `load_kaggle_dataset(path)`
+    - [ ] `zero_shot_test(model, X_test, y_test)`
+
+#### Shared – Integration and project setup
+
+- [x] **Decide initial training vs. test data layout**
+  - **Status**: Completed in dev log entry `2025-11-29 – Data layout & large CSV planning`.
+- [x] **Add `.gitignore` rule to ignore large WELFake CSV**
+  - **Status**: Completed in dev log entry `2025-11-29 – .gitignore for large test CSV`.
+- [x] **Create script to generate 1,000-row WELFake sample from WELFake dataset**
+  - **Status**: Completed in dev log entry `2025-11-29 – WELFake sample preparation script`.
+- [ ] **Restructure repository into final `data/`, `src/`, and `notebooks/` layout**
+  - **Status**: Planned; not yet reflected in the current file tree as of the latest dev session.
+- [ ] **Create `08_main_experiments.ipynb` to tie together all experiments**
+  - **Status**: Planned; to be filled jointly by Junaid (baselines) and Reuben (advanced models and transfer).
+
 ### Data organization so far
 
 - **Training data location**:
