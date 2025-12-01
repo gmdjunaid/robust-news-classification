@@ -48,6 +48,19 @@
 
 - **Goal**: Build a model to classify news articles as fake or real.
 
+### Project context & proposal
+
+- **Problem framing**: Most fake-news classifiers are evaluated on random train/test splits where topic, source, and writing style are similar, so models can exploit superficial cues (topic, outlet, boilerplate phrases) instead of learning robust signals of misinformation. This project explicitly targets robustness by testing models under topic shifts and across different datasets where shortcut learning is more likely to fail.
+- **Why it matters**: Fake news is a moving target—new topics, narratives, and writing styles appear over time. Evaluating only on random splits can overstate reliability because of dataset artifacts and leakage, so we focus on generalization, leakage prevention, and transferability, aligning with course themes on bias, fairness, and methodological rigor.
+- **Primary datasets**: Use the ISOT Fake and Real News dataset (~45k labeled articles with `title`, `text`, `subject`, `date`) for training and main experiments, plus a one-time external evaluation on the “Getting Real About Fake News” Kaggle dataset to test cross-dataset transfer. The WELFake sample in `test-data/` is used as additional external test data for quick experimentation.
+- **Robustness focus**:
+  - **Topic-holdout evaluation**: Train on some subject categories and test on held-out subjects to simulate emerging misinformation topics.
+  - **Cross-dataset transfer**: Train on ISOT and evaluate zero-shot on “Getting Real About Fake News” to reveal dataset-specific artifacts vs. generalizable patterns.
+  - **Leakage prevention**: Clean and deduplicate data, remove boilerplate and repeated signatures, standardize formatting, and avoid features tied to source identity to reduce label leakage and inflated accuracy.
+- **Modeling plan**: Start with TF-IDF features plus Logistic Regression and Linear SVM as interpretable baselines, then add lightweight sentence-embedding models, and finally fine-tune a transformer-based classifier (e.g., DistilBERT) as a modern benchmark.
+- **Evaluation plan**: Compare models under both random 80/10/10 splits and topic-holdout splits, and perform cross-dataset tests for zero-shot transfer. Macro-F1 is the primary metric (to balance classes), with PR-AUC and ROC-AUC as secondary metrics for ranking and threshold analysis.
+- **Ethics and scope**: Labels may encode curator bias and fake-news detection is context-sensitive, so the project is methodological only (no deployment, no claims about specific outlets). All preprocessing, evaluation choices, and limitations will be documented for transparency and reproducibility.
+
 ### Task distribution and status
 
 #### Junaid – Data engineering and baselines
