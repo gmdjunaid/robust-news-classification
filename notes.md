@@ -56,6 +56,17 @@
 - **Documentation**: Both scripts include comprehensive docstrings with purpose, parameters, return values, examples, and error handling documentation to ensure code readability and maintainability.
 - **Alignment with project goals**: The topic holdout split function is particularly important for the robustness evaluation strategy, testing whether models can generalize to unseen topics rather than memorizing topic-specific patterns.
 
+#### 2025-12-01 – Baseline models and evaluation scripts
+
+- **Baseline models script created**: Added `scripts/03_baseline_models.py` with functions to build TF-IDF features and train interpretable baseline classifiers.
+  - `build_tfidf()`: Creates and configures a TF-IDF vectorizer with sensible defaults (max_features=5000, ngram_range=(1,2)) for news classification feature extraction.
+  - `train_logreg(X_train, y_train)`: Trains a Logistic Regression classifier on TF-IDF features, providing interpretable coefficients for understanding word importance patterns.
+  - `train_svm(X_train, y_train)`: Trains a Linear SVM classifier on TF-IDF features, offering an alternative learning bias compared to Logistic Regression for model comparison.
+- **Evaluation script created**: Added `scripts/04_baseline_eval.py` with comprehensive evaluation function following the project's evaluation plan.
+  - `evaluate(model, X_test, y_test, model_name="baseline")`: Evaluates trained models using Macro-F1 as the primary metric (to balance classes), with PR-AUC and ROC-AUC as secondary metrics. Also computes accuracy, precision, recall, confusion matrix, and detailed classification reports for comprehensive analysis.
+- **Documentation**: Both scripts include comprehensive docstrings explaining purpose, parameters, return values, examples, and error handling, ensuring code readability and maintainability.
+- **Alignment with project goals**: Implements interpretable baseline models (TF-IDF + Logistic Regression/SVM) as specified in the modeling plan, serving as benchmarks against which advanced models will be compared. The evaluation function uses Macro-F1 as the primary metric as specified in the evaluation plan, supporting robust model comparison across different split strategies.
+
 ### Project summary
 
 - **Goal**: Build a model to classify news articles as fake or real.
@@ -85,12 +96,12 @@
   - [x] `02_data_splitting.py`
     - [x] `random_split(df)`
     - [x] `topic_holdout_split(df, topic_column, heldout_topic)`
-  - [ ] `03_baseline_models.py`
-    - [ ] `build_tfidf()`
-    - [ ] `train_logreg(X_train, y_train)`
-    - [ ] `train_svm(X_train, y_train)`
-  - [ ] `04_baseline_eval.py`
-    - [ ] `evaluate(model, X_test, y_test, model_name="baseline")`
+  - [x] `03_baseline_models.py`
+    - [x] `build_tfidf()`
+    - [x] `train_logreg(X_train, y_train)`
+    - [x] `train_svm(X_train, y_train)`
+  - [x] `04_baseline_eval.py`
+    - [x] `evaluate(model, X_test, y_test, model_name="baseline")`
 
 #### Reuben – Advanced models and transfer
 
