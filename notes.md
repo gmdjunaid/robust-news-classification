@@ -44,6 +44,18 @@
 - **Script location**: Placed in `scripts/` directory for organization and clarity.
 - **Documentation**: Script includes comments explaining that it assumes developers have the original large CSV locally, so reviewers can see exactly how the large CSV was processed.
 
+#### 2025-12-01 – Preprocessing and data splitting scripts
+
+- **Preprocessing script created**: Added `scripts/01_preprocessing.py` with functions to load ISOT dataset and clean text data.
+  - `load_isot(fake_path, real_path)`: Loads and combines Fake.csv and True.csv files, adds binary labels (1=fake, 0=real), and tracks source file origin.
+  - `clean_text(text)`: Cleans individual text strings by removing URLs, email addresses, and normalizing whitespace to reduce noise in news articles.
+  - `apply_cleaning(df, text_column='text')`: Applies text cleaning to DataFrame columns, creating cleaned versions while preserving originals.
+- **Data splitting script created**: Added `scripts/02_data_splitting.py` with functions for train/test splitting strategies.
+  - `random_split(df, test_size=0.2, random_state=42)`: Performs stratified random split to maintain balanced fake/real distribution in train and test sets.
+  - `topic_holdout_split(df, topic_column='subject', heldout_topic=None)`: Implements topic-based holdout splitting to evaluate model robustness by testing on completely unseen topics, aligning with project focus on generalization across topics.
+- **Documentation**: Both scripts include comprehensive docstrings with purpose, parameters, return values, examples, and error handling documentation to ensure code readability and maintainability.
+- **Alignment with project goals**: The topic holdout split function is particularly important for the robustness evaluation strategy, testing whether models can generalize to unseen topics rather than memorizing topic-specific patterns.
+
 ### Project summary
 
 - **Goal**: Build a model to classify news articles as fake or real.
@@ -66,13 +78,13 @@
 #### Junaid – Data engineering and baselines
 
 - **Core scripts (planned)**:
-  - [ ] `01_preprocessing.py`
-    - [ ] `load_isot(fake_path, real_path)`
-    - [ ] `clean_text(text)`
-    - [ ] `apply_cleaning(df)`
-  - [ ] `02_data_splitting.py`
-    - [ ] `random_split(df)`
-    - [ ] `topic_holdout_split(df, topic_column, heldout_topic)`
+  - [x] `01_preprocessing.py`
+    - [x] `load_isot(fake_path, real_path)`
+    - [x] `clean_text(text)`
+    - [x] `apply_cleaning(df)`
+  - [x] `02_data_splitting.py`
+    - [x] `random_split(df)`
+    - [x] `topic_holdout_split(df, topic_column, heldout_topic)`
   - [ ] `03_baseline_models.py`
     - [ ] `build_tfidf()`
     - [ ] `train_logreg(X_train, y_train)`
