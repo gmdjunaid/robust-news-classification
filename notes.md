@@ -79,6 +79,13 @@
   - `TransformerSklearnWrapper`: Sklearn-style wrapper exposing `.predict()` and `.predict_proba()` so transformer models can be passed directly into `scripts/04_baseline_eval.py::evaluate`, enabling consistent Macro-F1, PR-AUC, and ROC-AUC comparisons across TF-IDF baselines, embedding models, and transformers.
  - **Alignment with project goals**: Implements the advanced modeling components (embeddings + transformer) called for in the proposal while keeping interfaces and label conventions compatible with existing preprocessing, splitting, and evaluation utilities, supporting robust comparisons under random, topic-holdout, and later cross-dataset settings.
 
+#### 2025-12-01 – Cross-dataset transfer utilities
+
+- **Cross-dataset transfer script created**: Added `scripts/07_cross_dataset_transfer.py` with utilities to evaluate ISOT-trained models on external datasets.
+  - `load_kaggle_dataset(path, text_column="text", label_column="label", ...)`: Loads an external fake-news CSV (e.g., Kaggle or WELFake-style), maps its labels into the project’s standard convention (0=real, 1=fake), and optionally applies the shared `clean_text` function to create a `text_cleaned` column.
+  - `zero_shot_test(model, X_test, y_test, average="macro")`: Runs a trained model (baseline, embedding-based, or transformer wrapper) on the external dataset without any fine-tuning and returns Macro-F1, providing a direct measure of cross-dataset robustness.
+- **Alignment with project goals**: Implements the cross-dataset transfer component described in the proposal, enabling zero-shot evaluation on datasets beyond ISOT using the same 0/1 label convention and primary Macro-F1 metric, and keeping interfaces compatible with existing preprocessing and evaluation utilities.
+
 ### Project summary
 
 - **Goal**: Build a model to classify news articles as fake or real.
@@ -126,9 +133,9 @@
     - [x] `build_transformer()`
     - [x] `tokenize(tokenizer, texts)`
     - [x] `train_transformer(model, tokenizer, train_texts, train_labels)`
-  - [ ] `07_cross_dataset_transfer.py`
-    - [ ] `load_kaggle_dataset(path)`
-    - [ ] `zero_shot_test(model, X_test, y_test)`
+  - [x] `07_cross_dataset_transfer.py`
+    - [x] `load_kaggle_dataset(path)`
+    - [x] `zero_shot_test(model, X_test, y_test)`
 
 #### Shared – Integration and project setup
 
