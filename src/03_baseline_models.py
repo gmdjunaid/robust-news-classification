@@ -220,3 +220,4 @@ def train_svm(X_train: Union[List[str], np.ndarray],
     print(f"  Training accuracy: {model.score(X_train, y_train):.4f}")
     
     return model
+

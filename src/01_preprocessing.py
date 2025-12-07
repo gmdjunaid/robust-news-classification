@@ -43,7 +43,7 @@ def load_isot(fake_path: Union[str, Path], real_path: Union[str, Path]) -> pd.Da
         ValueError: If required columns (title, text) are missing from the CSVs.
     
     Example:
-        >>> df = load_isot('training-data/Fake.csv', 'training-data/True.csv')
+        >>> df = load_isot('data/training/Fake.csv', 'data/training/True.csv')
         >>> print(df['label'].value_counts())
         1    23481  # fake news
         0    21417  # real news
@@ -180,3 +180,4 @@ def apply_cleaning(df: pd.DataFrame, text_column: str = 'text') -> pd.DataFrame:
     print(f"Created new column '{cleaned_column}' with cleaned text")
     
     return df_cleaned
+

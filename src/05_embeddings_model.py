@@ -25,7 +25,7 @@ Typical usage in experiments:
     ... )
     >>>
     >>> # Load and preprocess ISOT data
-    >>> df = load_isot("training-data/Fake.csv", "training-data/True.csv")
+    >>> df = load_isot("data/training/Fake.csv", "data/training/True.csv")
     >>> df = apply_cleaning(df, text_column="text")  # creates 'text_cleaned'
     >>> df_train, df_test = random_split(df)
     >>>

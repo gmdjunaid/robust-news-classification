@@ -77,7 +77,7 @@
   - `FakeNewsDataset`: Lightweight Dataset wrapper that tokenizes articles on the fly for Hugging Face Trainer-based fine-tuning.
   - `build_transformer()`, `tokenize(...)`, `train_transformer(...)`: Build, tokenize for, and fine-tune a transformer classifier on ISOT data, again respecting the 0=real, 1=fake label convention.
   - `TransformerSklearnWrapper`: Sklearn-style wrapper exposing `.predict()` and `.predict_proba()` so transformer models can be passed directly into `scripts/04_baseline_eval.py::evaluate`, enabling consistent Macro-F1, PR-AUC, and ROC-AUC comparisons across TF-IDF baselines, embedding models, and transformers.
- - **Alignment with project goals**: Implements the advanced modeling components (embeddings + transformer) called for in the proposal while keeping interfaces and label conventions compatible with existing preprocessing, splitting, and evaluation utilities, supporting robust comparisons under random, topic-holdout, and later cross-dataset settings.
+- **Alignment with project goals**: Implements the advanced modeling components (embeddings + transformer) called for in the proposal while keeping interfaces and label conventions compatible with existing preprocessing, splitting, and evaluation utilities, supporting robust comparisons under random, topic-holdout, and later cross-dataset settings.
 
 #### 2025-12-01 – Cross-dataset transfer utilities
 
@@ -85,6 +85,23 @@
   - `load_kaggle_dataset(path, text_column="text", label_column="label", ...)`: Loads an external fake-news CSV (e.g., Kaggle or WELFake-style), maps its labels into the project’s standard convention (0=real, 1=fake), and optionally applies the shared `clean_text` function to create a `text_cleaned` column.
   - `zero_shot_test(model, X_test, y_test, average="macro")`: Runs a trained model (baseline, embedding-based, or transformer wrapper) on the external dataset without any fine-tuning and returns Macro-F1, providing a direct measure of cross-dataset robustness.
 - **Alignment with project goals**: Implements the cross-dataset transfer component described in the proposal, enabling zero-shot evaluation on datasets beyond ISOT using the same 0/1 label convention and primary Macro-F1 metric, and keeping interfaces compatible with existing preprocessing and evaluation utilities.
+
+#### 2025-12-01 – Repository restructuring and main experiments notebook
+
+- **Repository restructuring**: Restructured project into final `data/`, `src/`, and `notebooks/` layout as planned.
+  - Moved all Python scripts from `scripts/` to `src/` directory.
+  - Moved training data from `training-data/` to `data/training/` directory.
+  - Moved test data from `test-data/` to `data/test/` directory.
+  - Created `notebooks/` directory for Jupyter notebooks.
+  - Updated all file paths in scripts (including `prepare_welfake_sample.py`) to reflect new directory structure.
+  - Updated `.gitignore` to use new `data/test/WELFake_Dataset.csv` path.
+  - Updated example paths in docstrings across all scripts.
+- **Main experiments notebook created**: Added `notebooks/08_main_experiments.ipynb` that ties together all experimental components.
+  - Comprehensive pipeline covering data loading, preprocessing, splitting (random and topic-holdout), baseline models (TF-IDF + LogReg/SVM), advanced models (embeddings, transformers), evaluation, and cross-dataset transfer.
+  - Uses importlib for importing modules with numeric prefixes, ensuring compatibility with the `src/` structure.
+  - Includes results summary and robustness analysis comparing models across split strategies.
+  - Documents all steps with markdown cells explaining the experimental design and project goals.
+- **Alignment with project goals**: The restructuring improves project organization and maintainability, while the main experiments notebook provides a complete, reproducible pipeline for evaluating model robustness under different scenarios (random splits, topic-holdout, cross-dataset transfer) as specified in the evaluation plan.
 
 ### Project summary
 
@@ -145,20 +162,23 @@
   - **Status**: Completed in dev log entry `2025-11-29 – .gitignore for large test CSV`.
 - [x] **Create script to generate 1,000-row WELFake sample from WELFake dataset**
   - **Status**: Completed in dev log entry `2025-11-29 – WELFake sample preparation script`.
-- [ ] **Restructure repository into final `data/`, `src/`, and `notebooks/` layout**
-  - **Status**: Planned; not yet reflected in the current file tree as of the latest dev session.
-- [ ] **Create `08_main_experiments.ipynb` to tie together all experiments**
-  - **Status**: Planned; to be filled jointly by Junaid (baselines) and Reuben (advanced models and transfer).
+- [x] **Restructure repository into final `data/`, `src/`, and `notebooks/` layout**
+  - **Status**: Completed. All scripts moved to `src/`, training data to `data/training/`, test data to `data/test/`, and created `notebooks/` directory. Updated file paths in all scripts and `.gitignore`.
+- [x] **Create `08_main_experiments.ipynb` to tie together all experiments**
+  - **Status**: Completed. Created comprehensive notebook in `notebooks/08_main_experiments.ipynb` that integrates all components: preprocessing, data splitting (random and topic-holdout), baseline models (TF-IDF + LogReg/SVM), advanced models (embeddings, transformers), evaluation with Macro-F1/ROC-AUC/PR-AUC, and cross-dataset transfer evaluation.
 
 ### Data organization so far
 
 - **Training data location**:
-  - `training-data/Fake.csv`
-  - `training-data/True.csv`
+  - `data/training/Fake.csv`
+  - `data/training/True.csv`
 - **Test data location**:
-  - `test-data/fake.csv`
-  - `test-data/WELFake_Dataset_sample_1000.csv` (sample of 1,000 rows from the large WELFake dataset, created via `scripts/prepare_welfake_sample.py`)
-  - An additional, very large CSV file (`test-data/WELFake_Dataset.csv`) available locally but not tracked in git.
+  - `data/test/fake.csv`
+  - `data/test/WELFake_Dataset_sample_1000.csv` (sample of 1,000 rows from the large WELFake dataset, created via `src/prepare_welfake_sample.py`)
+  - An additional, very large CSV file (`data/test/WELFake_Dataset.csv`) available locally but not tracked in git.
+- **Code location**:
+  - All Python scripts are in `src/` directory.
+  - Main experiments notebook is in `notebooks/08_main_experiments.ipynb`.
 - **Work in progress**: We’ve mainly been deciding where to store training vs. test CSV files and adjusting the project layout to keep this organized.
 
 ### Challenges

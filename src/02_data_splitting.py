@@ -47,7 +47,7 @@ def random_split(df: pd.DataFrame,
         ValueError: If test_size is not between 0.0 and 1.0.
     
     Example:
-        >>> df = load_isot('training-data/Fake.csv', 'training-data/True.csv')
+        >>> df = load_isot('data/training/Fake.csv', 'data/training/True.csv')
         >>> df_train, df_test = random_split(df, test_size=0.2, random_state=42)
         >>> print(f"Train: {len(df_train)}, Test: {len(df_test)}")
         Train: 35918, Test: 8980
@@ -119,7 +119,7 @@ def topic_holdout_split(df: pd.DataFrame,
         ValueError: If heldout_topic is specified but doesn't exist in the data.
     
     Example:
-        >>> df = load_isot('training-data/Fake.csv', 'training-data/True.csv')
+        >>> df = load_isot('data/training/Fake.csv', 'data/training/True.csv')
         >>> # Hold out all 'politicsNews' articles for testing
         >>> df_train, df_test = topic_holdout_split(df, topic_column='subject', 
         ...                                          heldout_topic='politicsNews')
@@ -168,3 +168,4 @@ def topic_holdout_split(df: pd.DataFrame,
     print(f"  Test labels: {df_test['label'].value_counts().to_dict()}")
     
     return df_train, df_test
+

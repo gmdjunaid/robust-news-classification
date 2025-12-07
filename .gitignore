@@ -1,5 +1,5 @@
 # Large data files that exceed GitHub's 100MB limit
-test-data/WELFake_Dataset.csv
+data/test/WELFake_Dataset.csv
 
 # Large files in general (over 100MB)
 *.zip
