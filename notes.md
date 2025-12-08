@@ -120,6 +120,13 @@
 - **Vectorizer handling**: Fit TF-IDF once on full train; reuse for both test sets to avoid refitting/overwriting.
 - **Cross-dataset**: WELFake eval now serves as the cross-dataset transfer check; legacy placeholder cells removed.
 
+#### 2025-12-08 – Cross-dataset WELFake results & open issues
+
+- **Observation**: Models train well on ISOT (train acc ≈ 0.99) but perform near-random on WELFake (macro-F1 ≈ 0.14–0.18, ROC-AUC ≈ 0.09–0.11); embeddings only slightly better than TF-IDF.
+- **Fake-only sanity check**: On `data/test/fake.csv`, TF-IDF models catch most fakes (recall ≈ 0.94–0.95); embeddings recall ≈ 0.75. Good performance here but it does not transfer to WELFake.
+- **Hypothesized causes**: Domain/style mismatch between ISOT and WELFake, possible preprocessing/cleaning differences, or label/schema quirks despite the flip to 1=fake/0=real.
+- **Status**: Time-limited before the oral presentation; models run end-to-end, but cross-dataset generalization remains weak. We’ll investigate preprocessing parity, label mapping, and domain adaptation after the presentation.
+
 ### Project summary
 
 - **Goal**: Build a model to classify news articles as fake or real.
@@ -205,6 +212,8 @@
 - **Topic-holdout single-class issue**: Holding out certain topics (e.g., politicsNews) produced test sets with only one class, making Macro-F1/ROC/PR invalid and triggering the two-class guard. We decided to skip topic holdout for the final flow and instead use fake-only FN checks plus mixed labeled external sets for full metrics.
 - **Label conventions differ across datasets**: ISOT uses 1=fake/0=real; WELFake sources use 0=fake/1=real, so labels must be flipped before evaluation to avoid inverted metrics.
 - **Embedding dependencies**: Embedding section requires `sentence-transformers` and model weights; needs guarding to avoid breaking the run in constrained environments.
+- **Cross-dataset gap (ISOT → WELFake)**: Despite correct label flipping, WELFake metrics are near-random, suggesting domain/style mismatch or preprocessing inconsistencies; needs post-presentation investigation.
+- **Time constraint before oral presentation**: Pipeline is functional, but cross-dataset fixes and deeper cleaning checks are deferred until after the presentation.
 
 ### Current plan
 
@@ -220,3 +229,4 @@
   - Notes on model performance and accuracy.
   - Ideas for improving data organization or preprocessing.
   - Decision on whether to keep ignoring the original huge CSV file or replace it with a smaller, tracked subset file.
+  - Investigate WELFake preprocessing parity, label mapping sanity checks, and simple domain adaptation or threshold tuning to improve cross-dataset results.

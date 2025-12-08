@@ -6,3 +6,25 @@ data/test/WELFake_Dataset.csv
 *.tar.gz
 *.rar
 
+# Personal files
+R.md
+
+# Python virtual environment
+.venv/
+# Accidental env folders from mis-typed venv commands
+create/
+environment/
+virtual/
+in/
+a/
+\#/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Jupyter
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
