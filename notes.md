@@ -1,4 +1,4 @@
-### Instructions for editing (for humans and AI)
+### Instructions for editing
 
 - **Purpose**: This file tracks development-session notes and high-level decisions for the robust news classification project.
 - **Heading style**:
@@ -14,7 +14,7 @@
   - `Current plan`
   - `Future notes / TODOs`
   - `Dev session log`
-- **How to add new notes (humans and AI)**:
+- **How to add new notes**:
   - For new work in a specific session, add a new dated entry under `Dev session log` and describe changes as short bullets.
   - Append new dev sessions to the **bottom** of the log without rewriting or deleting earlier sessions.
   - Only update the high-level sections above if something has materially changed (e.g., project goal, data layout, main plan).
@@ -230,3 +230,14 @@
   - Ideas for improving data organization or preprocessing.
   - Decision on whether to keep ignoring the original huge CSV file or replace it with a smaller, tracked subset file.
   - Investigate WELFake preprocessing parity, label mapping sanity checks, and simple domain adaptation or threshold tuning to improve cross-dataset results.
+
+#### TA suggestion: Feature engineering experiment
+
+- **Context**: TA noted that cross-dataset scores are poor and suggested exploring whether adding more features improves results.
+- **Experiment idea**: Extend feature set beyond article body text to include:
+  - **Title text**: Concatenate or separately encode article titles.
+  - **URL-derived features**: Extract words/tokens from URLs if available (e.g., source domain, path keywords).
+  - **Metadata features**: Article length, punctuation counts, capitalization ratios, etc.
+- **Goal**: Compare baseline (text-only) results vs. multi-feature results to see if richer feature representation improves cross-dataset transfer performance.
+- **Why this matters**: If adding features significantly improves WELFake Macro-F1, it suggests the text-only models are missing important signals. If it doesn't help, it reinforces that the domain gap is fundamental.
+- **Status**: TODO – implement after oral presentation.
