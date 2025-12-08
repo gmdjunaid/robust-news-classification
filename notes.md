@@ -103,6 +103,23 @@
   - Documents all steps with markdown cells explaining the experimental design and project goals.
 - **Alignment with project goals**: The restructuring improves project organization and maintainability, while the main experiments notebook provides a complete, reproducible pipeline for evaluating model robustness under different scenarios (random splits, topic-holdout, cross-dataset transfer) as specified in the evaluation plan.
 
+#### 2025-12-08 – Data split approach revised
+
+- **Initial approach**: Planned random/topic splits on a single combined dataset to test robustness.
+- **Issue discovered**: With separate all-fake and all-real training files, the held-out-topic split produced single-class test sets (e.g., politicsNews all real), making Macro-F1/ROC/PR unusable and triggering the two-class guard in `evaluate`.
+- **Decision**: Keep `src/02_data_splitting.py` for historical context but ignore it in the final flow. Final evaluation will train on full training data, use a fake-only check for false negatives on `data/test/fake.csv`, and use mixed labeled test sets (e.g., WELFake) for full metrics.
+- **Notebook cleanup**: Removed legacy placeholder cells in `08_main_experiments.ipynb` that belonged to the old topic-holdout/cross-dataset sections; kept brief notes instead to reflect the refactor.
+
+#### 2025-12-08 – Notebook refactor for final evaluation flow
+
+- **Training/eval flow**: Train once on full ISOT (Fake + True); no random/topic splits.
+- **Test sets**: 
+  - `data/test/fake.csv` (all fake) evaluated with a single-class-safe check (fake recall, false negatives).
+  - `data/test/WELFake_Dataset_sample_1000.csv` (mixed, labeled) evaluated with full metrics (Macro-F1, ROC-AUC, PR-AUC); labels flipped to our convention (1=fake, 0=real).
+- **Models**: TF-IDF + LogReg/SVM; optional sentence-embedding classifier shares the same train/test setup and fake-only check.
+- **Vectorizer handling**: Fit TF-IDF once on full train; reuse for both test sets to avoid refitting/overwriting.
+- **Cross-dataset**: WELFake eval now serves as the cross-dataset transfer check; legacy placeholder cells removed.
+
 ### Project summary
 
 - **Goal**: Build a model to classify news articles as fake or real.
@@ -185,6 +202,9 @@
 
 - **Large CSV sizes** are making git operations (pushing and pulling) slow and a bit cumbersome.
 - The **extra test CSV file** is extremely large, which makes it impractical to use in full for quick experiments.
+- **Topic-holdout single-class issue**: Holding out certain topics (e.g., politicsNews) produced test sets with only one class, making Macro-F1/ROC/PR invalid and triggering the two-class guard. We decided to skip topic holdout for the final flow and instead use fake-only FN checks plus mixed labeled external sets for full metrics.
+- **Label conventions differ across datasets**: ISOT uses 1=fake/0=real; WELFake sources use 0=fake/1=real, so labels must be flipped before evaluation to avoid inverted metrics.
+- **Embedding dependencies**: Embedding section requires `sentence-transformers` and model weights; needs guarding to avoid breaking the run in constrained environments.
 
 ### Current plan
 
