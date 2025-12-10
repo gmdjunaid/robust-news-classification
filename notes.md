@@ -163,6 +163,20 @@
 - **Code preserved**: The transformer module (`src/06_transformer_model.py`) remains in the codebase for potential future use or reference, but is no longer used in the main experimental pipeline.
 - **Current focus**: The project now focuses on comparing TF-IDF-based baselines (Logistic Regression, Linear SVM) with sentence-embedding models, which provide a good balance between performance and computational efficiency.
 
+#### 2025-12-10 – Multi-feature baselines and embedding variants
+
+- **TF-IDF multi-feature**: Added a new notebook section that concatenates title+text and appends simple length features (title/text character counts). Trained/evaluated LogReg and Linear SVM on these combined features for WELFake and fake-only checks.
+- **Embedding + lengths**: Added a sentence-embedding variant that encodes concatenated title+text and appends the same length features before training a Logistic Regression classifier; evaluated on WELFake and fake-only tests.
+- **Results summary**: Added a consolidated results summary cell to compare text-only TF-IDF, multi-feature TF-IDF, embedding (text-only), and embedding+length models on WELFake and fake-only recall.
+- **WELFake sample**: Notebook and experiments use the 10k WELFake sample (`data/test/WELFake_Dataset_sample_10000.csv`) for mixed labeled evaluation.
+
+#### 2025-12-10 – Final results capture and conclusions refresh
+
+- **Results recorded**: Captured the latest executed outputs (WELFake 10k + fake-only) into `results.md`, including multi-feature and embedding variants with fake-recall counts.
+- **Notebook conclusions updated**: Rewrote `## 7. Conclusions and Discussion` to reflect observed performance: TF-IDF text-only still best (macro-F1 ≈0.829–0.831); length features and embedding+lengths underperform and hurt fake recall; embeddings trail TF-IDF.
+- **Summary cell confirmed**: Results summary cell now surfaces the latest metrics (macro-F1/ROC-AUC/PR-AUC + fake-only recall) for all six variants; optional cells guarded by pre-set `None` initializers remain in place.
+- **Push readiness**: Notebook is fully executed with outputs shown; results mirrored into `results.md` for reporting.
+
 ### Project summary
 
 - **Goal**: Build a model to classify news articles as fake or real.
@@ -225,7 +239,7 @@
 - [x] **Restructure repository into final `data/`, `src/`, and `notebooks/` layout**
   - **Status**: Completed. All scripts moved to `src/`, training data to `data/training/`, test data to `data/test/`, and created `notebooks/` directory. Updated file paths in all scripts and `.gitignore`.
 - [x] **Create `08_main_experiments.ipynb` to tie together all experiments**
-  - **Status**: Completed. Created comprehensive notebook in `notebooks/08_main_experiments.ipynb` that integrates all components: preprocessing, data splitting (random and topic-holdout), baseline models (TF-IDF + LogReg/SVM), advanced models (embeddings), evaluation with Macro-F1/ROC-AUC/PR-AUC, and cross-dataset transfer evaluation. Transformer components were removed in a later session due to training time constraints.
+  - **Status**: Completed. Created comprehensive notebook in `notebooks/08_main_experiments.ipynb` that integrates all components: preprocessing, data splitting (random and topic-holdout), baseline models (TF-IDF + LogReg/SVM), advanced models (embeddings), evaluation with Macro-F1/ROC-AUC/PR-AUC, and cross-dataset transfer evaluation. Transformer components were removed in a later session due to training time constraints. Multi-feature TF-IDF and embedding+length variants were added for feature-engineering experiments.
 
 ### Data organization so far
 
@@ -234,7 +248,7 @@
   - `data/training/True.csv`
 - **Test data location**:
   - `data/test/fake.csv`
-  - `data/test/WELFake_Dataset_sample_1000.csv` (sample of 1,000 rows from the large WELFake dataset, created via `src/prepare_welfake_sample.py`)
+  - `data/test/WELFake_Dataset_sample_10000.csv` (10,000-row sample from the large WELFake dataset, created via `src/prepare_welfake_sample.py`)
   - An additional, very large CSV file (`data/test/WELFake_Dataset.csv`) available locally but not tracked in git.
 - **Code location**:
   - All Python scripts are in `src/` directory.
@@ -301,6 +315,7 @@
   - `num_train_epochs=0.5` (half epoch) for faster iteration
   - `per_device_train_batch_size=32` (up from 16) for faster training when memory allows
   - Notebook updated to use these defaults with clear comments on how to override for better results
+- **Feature engineering follow-ups**: Initial multi-feature runs added (title+text concat, length features for TF-IDF and embeddings). Potential next steps: URL-based tokens, punctuation/ratio features, and title/body weighting; evaluate whether richer metadata improves cross-dataset robustness.
 
 #### TA suggestion: Feature engineering experiment
 
