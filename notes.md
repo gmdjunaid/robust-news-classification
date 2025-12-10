@@ -147,6 +147,14 @@
 - **Resolution**: We revert to the original internal convention `1=fake, 0=real` (ISOT assigned in code). WELFake is treated as having `1=fake, 0=real` (the opposite of its documentation).
 - **Interpretation**: Earlier “inverse” performance was due to label confusion, not randomization; results are now interpreted under the corrected label understanding.
 
+#### 2025-12-10 – WELFake 10k sample & GPU configuration
+
+- **WELFake 10k sample integrated**: Updated `src/prepare_welfake_sample.py` and `08_main_experiments.ipynb` so the main flow now uses `data/test/WELFake_Dataset_sample_10000.csv` as the mixed labeled external test set (instead of the earlier 1k sample).
+- **Device checks in notebook**: Added a small torch diagnostic cell near the top of `08_main_experiments.ipynb` to print `cuda`/`mps` availability, making it explicit when the environment is using Apple Silicon GPU (MPS) vs. CPU.
+- **Automatic GPU selection (embeddings)**: Modified `src/05_embeddings_model.py::build_embeddings` to automatically pick `cuda` if available, otherwise `mps` on Apple Silicon, and fall back to `cpu`, so SentenceTransformer embedding computation now runs on GPU when possible.
+- **Automatic GPU selection (transformer wrapper)**: Updated `src/06_transformer_model.py::TransformerSklearnWrapper` to use the same device-selection logic (CUDA → MPS → CPU), ensuring DistilBERT evaluation (zero-shot on WELFake and fake-only test) uses GPU without manual device arguments.
+- **Accelerate dependency resolved**: Installed and documented the need for a compatible `accelerate` version with `transformers`, which previously caused runtime errors; with the correct version and MPS enabled, fine-tuning remains slow but is now feasible within course constraints.
+
 ### Project summary
 
 - **Goal**: Build a model to classify news articles as fake or real.
@@ -234,6 +242,7 @@
 - **Embedding dependencies**: Embedding section requires `sentence-transformers` and model weights; needs guarding to avoid breaking the run in constrained environments.
 - **Cross-dataset gap (ISOT → WELFake)**: ROC-AUC consistently below 0.5 (~0.09-0.11) indicates models are **systematically inverted** — patterns learned on ISOT are negatively correlated with WELFake. This is a genuine cross-dataset transfer failure, not a bug (after label clarification).
 - **Transformers environment/runtime**: Older `transformers` requires `accelerate>=0.26.0`; fine-tuning DistilBERT on CPU is slow (~45–60 min/epoch). GPU or shorter `max_length`/capped steps recommended for quicker iterations.
+- **GPU configuration on Apple Silicon**: Getting transformers and sentence-embeddings to actually use the Mac’s GPU required installing a compatible `accelerate` version, ensuring the Jupyter kernel matched the `.venv`, and adding explicit CUDA/MPS device selection; even with MPS enabled, full-epoch DistilBERT training over ~45k articles remains slow, so GPU use had to be balanced against time constraints.
 - **Time constraint before oral presentation**: Pipeline is functional, but cross-dataset fixes and deeper cleaning checks are deferred until after the presentation.
 
 ### Current plan
@@ -275,6 +284,7 @@
   - Ideas for improving data organization or preprocessing.
   - Decision on whether to keep ignoring the original huge CSV file or replace it with a smaller, tracked subset file.
   - Investigate WELFake preprocessing parity, label mapping sanity checks, and simple domain adaptation or threshold tuning to improve cross-dataset results.
+- **Transformer speedup**: Try faster runs by lowering `max_length` (e.g., 128), increasing `per_device_train_batch_size` if memory allows, and using partial epochs (e.g., 0.5) to make DistilBERT training more practical on MPS.
 
 #### TA suggestion: Feature engineering experiment
 

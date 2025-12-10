@@ -49,6 +49,7 @@ Typical usage in experiments:
 from typing import Sequence
 
 import numpy as np
+import torch
 from sentence_transformers import SentenceTransformer
 from sklearn.linear_model import LogisticRegression
 
@@ -78,7 +79,17 @@ def build_embeddings(model_name: str = "all-MiniLM-L6-v2") -> SentenceTransforme
         (1, 384)
     """
     print(f"Loading sentence-embedding model: {model_name}")
-    embedder = SentenceTransformer(model_name)
+
+    # Prefer CUDA, then Apple Silicon MPS, then CPU
+    if torch.cuda.is_available():
+        device = "cuda"
+    elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+        device = "mps"
+    else:
+        device = "cpu"
+
+    print(f"Using device for embeddings: {device}")
+    embedder = SentenceTransformer(model_name, device=device)
     print("Embedding model loaded successfully.")
     return embedder
 
