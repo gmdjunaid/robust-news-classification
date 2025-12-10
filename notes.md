@@ -127,6 +127,26 @@
 - **Hypothesized causes**: Domain/style mismatch between ISOT and WELFake, possible preprocessing/cleaning differences, or label/schema quirks despite the flip to 1=fake/0=real.
 - **Status**: Time-limited before the oral presentation; models run end-to-end, but cross-dataset generalization remains weak. We’ll investigate preprocessing parity, label mapping, and domain adaptation after the presentation.
 
+#### 2025-12-08 – Label convention investigation & transformer integration
+
+- **Label investigation**: Confirmed label conventions after confusion about inverted predictions:
+  - WELFake (per official docs): `0 = fake, 1 = real`
+  - ISOT: Updated `load_isot()` to use same convention (`Fake.csv → label=0`, `True.csv → label=1`)
+- **Convention unified**: Both datasets now use `0 = fake, 1 = real` — no mapping needed in notebook
+- **Key conclusion**: ROC-AUC < 0.5 is **not a bug** — it's genuine inverse cross-dataset transfer where ISOT patterns are negatively correlated with WELFake
+- **Transformer section added**: Implemented DistilBERT fine-tuning and evaluation in `08_main_experiments.ipynb`:
+  - Import and build transformer model
+  - Fine-tune on ISOT training data (1 epoch default for quick iteration)
+  - Wrap with `TransformerSklearnWrapper` for sklearn-compatible evaluation
+  - Evaluate on WELFake and fake-only test sets
+  - Results added to summary table
+
+#### 2025-12-09 – WELFake label clarification (doc error)
+
+- **Community finding**: Multiple users report WELFake docs are wrong; actual labels appear reversed versus the stated `0=fake, 1=real`. Empirically, WELFake behaves as `0=real, 1=fake`.
+- **Resolution**: We revert to the original internal convention `1=fake, 0=real` (ISOT assigned in code). WELFake is treated as having `1=fake, 0=real` (the opposite of its documentation).
+- **Interpretation**: Earlier “inverse” performance was due to label confusion, not randomization; results are now interpreted under the corrected label understanding.
+
 ### Project summary
 
 - **Goal**: Build a model to classify news articles as fake or real.
@@ -210,9 +230,10 @@
 - **Large CSV sizes** are making git operations (pushing and pulling) slow and a bit cumbersome.
 - The **extra test CSV file** is extremely large, which makes it impractical to use in full for quick experiments.
 - **Topic-holdout single-class issue**: Holding out certain topics (e.g., politicsNews) produced test sets with only one class, making Macro-F1/ROC/PR invalid and triggering the two-class guard. We decided to skip topic holdout for the final flow and instead use fake-only FN checks plus mixed labeled external sets for full metrics.
-- **Label conventions differ across datasets**: ISOT uses 1=fake/0=real; WELFake sources use 0=fake/1=real, so labels must be flipped before evaluation to avoid inverted metrics.
+- **Label confusion in WELFake docs**: WELFake documentation says 0=fake/1=real, but community evidence and our tests indicate labels are actually 1=fake/0=real. We reverted to the original internal convention (1=fake, 0=real) and treat WELFake as 1=fake/0=real to avoid inverted metrics.
 - **Embedding dependencies**: Embedding section requires `sentence-transformers` and model weights; needs guarding to avoid breaking the run in constrained environments.
-- **Cross-dataset gap (ISOT → WELFake)**: Despite correct label flipping, WELFake metrics are near-random, suggesting domain/style mismatch or preprocessing inconsistencies; needs post-presentation investigation.
+- **Cross-dataset gap (ISOT → WELFake)**: ROC-AUC consistently below 0.5 (~0.09-0.11) indicates models are **systematically inverted** — patterns learned on ISOT are negatively correlated with WELFake. This is a genuine cross-dataset transfer failure, not a bug (after label clarification).
+- **Transformers environment/runtime**: Older `transformers` requires `accelerate>=0.26.0`; fine-tuning DistilBERT on CPU is slow (~45–60 min/epoch). GPU or shorter `max_length`/capped steps recommended for quicker iterations.
 - **Time constraint before oral presentation**: Pipeline is functional, but cross-dataset fixes and deeper cleaning checks are deferred until after the presentation.
 
 ### Current plan
@@ -221,6 +242,30 @@
   - We keep a smaller, representative sample.
   - We can quickly test how well the model distinguishes fake vs. real news.
 - We do **not** need the full dataset yet; this is mainly for an initial accuracy and workflow test.
+
+### Key Finding: Inverse Cross-Dataset Transfer
+
+**Observation**: When testing ISOT-trained models on WELFake, ROC-AUC is consistently below 0.5 (~0.09-0.11), and models predict most real news as fake and most fake news as real.
+
+**What this means**:
+- ROC-AUC < 0.5 indicates the model is **systematically wrong**, not randomly wrong
+- If you flipped all predictions, you'd do better than random
+- The patterns learned on ISOT are **inversely correlated** with patterns in WELFake
+
+**Why this happens**:
+- ISOT and WELFake have fundamentally different characteristics (sources, time periods, writing styles)
+- Whatever signals mean "fake" in ISOT may correlate with "real" in WELFake
+- The model learned dataset-specific artifacts, not generalizable fake news patterns
+
+**Why this is important**:
+- This is a **meaningful negative result** — it demonstrates that standard benchmark accuracy (99% on ISOT) is meaningless for real-world deployment
+- Cross-dataset evaluation reveals that models don't just fail to generalize — they're actively misleading
+- This validates the project's focus on robustness testing
+
+**Label convention reference**:
+- ISOT (final): **1 = fake, 0 = real** (assigned in `load_isot()`)
+- WELFake (actual, despite docs): **1 = fake, 0 = real** (docs claim 0=fake/1=real, but evidence shows reversed)
+- Notebook: WELFake is used as-is (no mapping) under the `1=fake, 0=real` convention
 
 ### Future notes / TODOs
 

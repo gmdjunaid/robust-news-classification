@@ -9,7 +9,7 @@ under distribution shift rather than only on random splits of a single dataset.
 It provides:
 
     - load_kaggle_dataset: Load and clean an external fake-news dataset, mapping
-      labels into the project's standard convention (0 = real, 1 = fake).
+      labels into the project's standard convention (0 = fake, 1 = real).
     - zero_shot_test: Run an ISOT-trained model on the external dataset without
       further fine-tuning and compute Macro-F1 to quantify transfer performance.
 

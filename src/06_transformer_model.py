@@ -43,7 +43,7 @@ Typical usage in experiments:
 """
 
 from dataclasses import dataclass
-from typing import Any, Dict, Sequence, Tuple
+from typing import Any, Dict, Sequence, Tuple, Optional
 
 import numpy as np
 import torch
@@ -138,7 +138,7 @@ class TransformerSklearnWrapper:
         model: AutoModelForSequenceClassification,
         tokenizer: AutoTokenizer,
         max_length: int = 256,
-        device: str | None = None,
+        device: Optional[str] = None,
     ) -> None:
         self.model = model
         self.tokenizer = tokenizer
@@ -382,6 +382,7 @@ def train_transformer(
     )
 
     print("Configuring TrainingArguments...")
+    # Note: older versions of transformers may not support evaluation_strategy/save_strategy/report_to
     training_args = TrainingArguments(
         output_dir=output_dir,
         num_train_epochs=num_train_epochs,
@@ -390,10 +391,6 @@ def train_transformer(
         weight_decay=weight_decay,
         logging_steps=logging_steps,
         logging_dir=f"{output_dir}/logs",
-        save_strategy="epoch",
-        evaluation_strategy="no",  # evaluation handled externally
-        load_best_model_at_end=False,
-        report_to="none",  # disable external logging integrations by default
     )
 
     print("Initializing Trainer and starting training...")
