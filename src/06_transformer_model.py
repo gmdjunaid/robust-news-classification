@@ -311,8 +311,9 @@ def train_transformer(
     train_texts: Sequence[str],
     train_labels: Sequence[int],
     output_dir: str = "models/distilbert_isot",
-    num_train_epochs: float = 3.0,
-    per_device_train_batch_size: int = 16,
+    num_train_epochs: float = 0.5,
+    per_device_train_batch_size: int = 32,
+    max_length: int = 128,
     learning_rate: float = 5e-5,
     weight_decay: float = 0.01,
     logging_steps: int = 100,
@@ -342,9 +343,14 @@ def train_transformer(
         output_dir:
             Directory path where model checkpoints and logs will be saved.
         num_train_epochs:
-            Number of training epochs. Can be fractional (e.g., 2.5).
+            Number of training epochs. Can be fractional (e.g., 0.5 for half epoch).
+            Default is 0.5 for faster training on MPS/CPU.
         per_device_train_batch_size:
             Batch size per device (GPU/CPU) during training.
+            Default is 32 for faster training (increase if memory allows).
+        max_length:
+            Maximum sequence length for tokenization. Shorter sequences (default 128)
+            train faster than longer ones (256) with minimal accuracy impact.
         learning_rate:
             Learning rate for the AdamW optimizer.
         weight_decay:
@@ -363,6 +369,9 @@ def train_transformer(
         ...     train_texts=train_texts,
         ...     train_labels=train_labels,
         ...     output_dir="models/distilbert_isot",
+        ...     num_train_epochs=0.5,  # Half epoch for faster training
+        ...     max_length=128,  # Shorter sequences for speed
+        ...     per_device_train_batch_size=32,  # Larger batches if memory allows
         ... )
     """
     # Convert labels to NumPy array for basic validation
@@ -384,7 +393,7 @@ def train_transformer(
         texts=train_texts,
         labels=train_labels,
         tokenizer=tokenizer,
-        max_length=256,
+        max_length=max_length,
     )
 
     print("Configuring TrainingArguments...")

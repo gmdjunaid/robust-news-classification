@@ -113,7 +113,7 @@
 #### 2025-12-08 – Notebook refactor for final evaluation flow
 
 - **Training/eval flow**: Train once on full ISOT (Fake + True); no random/topic splits.
-- **Test sets**: 
+- **Test sets**:
   - `data/test/fake.csv` (all fake) evaluated with a single-class-safe check (fake recall, false negatives).
   - `data/test/WELFake_Dataset_sample_1000.csv` (mixed, labeled) evaluated with full metrics (Macro-F1, ROC-AUC, PR-AUC); labels flipped to our convention (1=fake, 0=real).
 - **Models**: TF-IDF + LogReg/SVM; optional sentence-embedding classifier shares the same train/test setup and fake-only check.
@@ -134,12 +134,7 @@
   - ISOT: Updated `load_isot()` to use same convention (`Fake.csv → label=0`, `True.csv → label=1`)
 - **Convention unified**: Both datasets now use `0 = fake, 1 = real` — no mapping needed in notebook
 - **Key conclusion**: ROC-AUC < 0.5 is **not a bug** — it's genuine inverse cross-dataset transfer where ISOT patterns are negatively correlated with WELFake
-- **Transformer section added**: Implemented DistilBERT fine-tuning and evaluation in `08_main_experiments.ipynb`:
-  - Import and build transformer model
-  - Fine-tune on ISOT training data (1 epoch default for quick iteration)
-  - Wrap with `TransformerSklearnWrapper` for sklearn-compatible evaluation
-  - Evaluate on WELFake and fake-only test sets
-  - Results added to summary table
+- **Transformer section added** (later removed): Initially implemented DistilBERT fine-tuning and evaluation in `08_main_experiments.ipynb`, but removed in a later session (2025-12-10) due to impractical training times even with speedup optimizations.
 
 #### 2025-12-09 – WELFake label clarification (doc error)
 
@@ -155,6 +150,19 @@
 - **Automatic GPU selection (transformer wrapper)**: Updated `src/06_transformer_model.py::TransformerSklearnWrapper` to use the same device-selection logic (CUDA → MPS → CPU), ensuring DistilBERT evaluation (zero-shot on WELFake and fake-only test) uses GPU without manual device arguments.
 - **Accelerate dependency resolved**: Installed and documented the need for a compatible `accelerate` version with `transformers`, which previously caused runtime errors; with the correct version and MPS enabled, fine-tuning remains slow but is now feasible within course constraints.
 
+#### 2025-12-10 – Transformer components removed
+
+- **Decision**: Removed all transformer (DistilBERT) components from `notebooks/08_main_experiments.ipynb` and updated documentation accordingly.
+- **Reason**: Despite implementing speedup optimizations (0.5 epochs, max_length=128, batch_size=32), transformer training still takes too long for practical use in the project timeline. Even with MPS GPU acceleration on Apple Silicon, fine-tuning DistilBERT on the full ISOT dataset (~45k articles) requires 15-30+ minutes per run, which is impractical for iterative experimentation and model comparison.
+- **Changes made**:
+  - Removed all transformer-related cells from the notebook (6 cells total: import, build, train, evaluate, fake-only test, and markdown section)
+  - Updated notebook overview to remove transformer mentions
+  - Updated project goals to focus on TF-IDF baselines vs. embeddings only
+  - Removed transformer row from results summary DataFrame
+  - Updated conclusions section to remove transformer references
+- **Code preserved**: The transformer module (`src/06_transformer_model.py`) remains in the codebase for potential future use or reference, but is no longer used in the main experimental pipeline.
+- **Current focus**: The project now focuses on comparing TF-IDF-based baselines (Logistic Regression, Linear SVM) with sentence-embedding models, which provide a good balance between performance and computational efficiency.
+
 ### Project summary
 
 - **Goal**: Build a model to classify news articles as fake or real.
@@ -168,7 +176,7 @@
   - **Topic-holdout evaluation**: Train on some subject categories and test on held-out subjects to simulate emerging misinformation topics.
   - **Cross-dataset transfer**: Train on ISOT and evaluate zero-shot on “Getting Real About Fake News” to reveal dataset-specific artifacts vs. generalizable patterns.
   - **Leakage prevention**: Clean and deduplicate data, remove boilerplate and repeated signatures, standardize formatting, and avoid features tied to source identity to reduce label leakage and inflated accuracy.
-- **Modeling plan**: Start with TF-IDF features plus Logistic Regression and Linear SVM as interpretable baselines, then add lightweight sentence-embedding models, and finally fine-tune a transformer-based classifier (e.g., DistilBERT) as a modern benchmark.
+- **Modeling plan**: Start with TF-IDF features plus Logistic Regression and Linear SVM as interpretable baselines, then add lightweight sentence-embedding models. Transformer fine-tuning was initially planned but removed due to impractical training times (see dev log entry "2025-12-10 – Transformer components removed").
 - **Evaluation plan**: Compare models under both random 80/10/10 splits and topic-holdout splits, and perform cross-dataset tests for zero-shot transfer. Macro-F1 is the primary metric (to balance classes), with PR-AUC and ROC-AUC as secondary metrics for ranking and threshold analysis.
 - **Ethics and scope**: Labels may encode curator bias and fake-news detection is context-sensitive, so the project is methodological only (no deployment, no claims about specific outlets). All preprocessing, evaluation choices, and limitations will be documented for transparency and reproducibility.
 
@@ -217,7 +225,7 @@
 - [x] **Restructure repository into final `data/`, `src/`, and `notebooks/` layout**
   - **Status**: Completed. All scripts moved to `src/`, training data to `data/training/`, test data to `data/test/`, and created `notebooks/` directory. Updated file paths in all scripts and `.gitignore`.
 - [x] **Create `08_main_experiments.ipynb` to tie together all experiments**
-  - **Status**: Completed. Created comprehensive notebook in `notebooks/08_main_experiments.ipynb` that integrates all components: preprocessing, data splitting (random and topic-holdout), baseline models (TF-IDF + LogReg/SVM), advanced models (embeddings, transformers), evaluation with Macro-F1/ROC-AUC/PR-AUC, and cross-dataset transfer evaluation.
+  - **Status**: Completed. Created comprehensive notebook in `notebooks/08_main_experiments.ipynb` that integrates all components: preprocessing, data splitting (random and topic-holdout), baseline models (TF-IDF + LogReg/SVM), advanced models (embeddings), evaluation with Macro-F1/ROC-AUC/PR-AUC, and cross-dataset transfer evaluation. Transformer components were removed in a later session due to training time constraints.
 
 ### Data organization so far
 
@@ -257,21 +265,25 @@
 **Observation**: When testing ISOT-trained models on WELFake, ROC-AUC is consistently below 0.5 (~0.09-0.11), and models predict most real news as fake and most fake news as real.
 
 **What this means**:
+
 - ROC-AUC < 0.5 indicates the model is **systematically wrong**, not randomly wrong
 - If you flipped all predictions, you'd do better than random
 - The patterns learned on ISOT are **inversely correlated** with patterns in WELFake
 
 **Why this happens**:
+
 - ISOT and WELFake have fundamentally different characteristics (sources, time periods, writing styles)
 - Whatever signals mean "fake" in ISOT may correlate with "real" in WELFake
 - The model learned dataset-specific artifacts, not generalizable fake news patterns
 
 **Why this is important**:
+
 - This is a **meaningful negative result** — it demonstrates that standard benchmark accuracy (99% on ISOT) is meaningless for real-world deployment
 - Cross-dataset evaluation reveals that models don't just fail to generalize — they're actively misleading
 - This validates the project's focus on robustness testing
 
 **Label convention reference**:
+
 - ISOT (final): **1 = fake, 0 = real** (assigned in `load_isot()`)
 - WELFake (actual, despite docs): **1 = fake, 0 = real** (docs claim 0=fake/1=real, but evidence shows reversed)
 - Notebook: WELFake is used as-is (no mapping) under the `1=fake, 0=real` convention
@@ -284,7 +296,11 @@
   - Ideas for improving data organization or preprocessing.
   - Decision on whether to keep ignoring the original huge CSV file or replace it with a smaller, tracked subset file.
   - Investigate WELFake preprocessing parity, label mapping sanity checks, and simple domain adaptation or threshold tuning to improve cross-dataset results.
-- **Transformer speedup**: Try faster runs by lowering `max_length` (e.g., 128), increasing `per_device_train_batch_size` if memory allows, and using partial epochs (e.g., 0.5) to make DistilBERT training more practical on MPS.
+- **Transformer speedup**: ❌ **Deprecated** — Transformer components were removed from the notebook due to training time constraints. Speedup optimizations were implemented but proved insufficient for practical use.
+  - `max_length=128` (down from 256) for faster tokenization and training
+  - `num_train_epochs=0.5` (half epoch) for faster iteration
+  - `per_device_train_batch_size=32` (up from 16) for faster training when memory allows
+  - Notebook updated to use these defaults with clear comments on how to override for better results
 
 #### TA suggestion: Feature engineering experiment
 
