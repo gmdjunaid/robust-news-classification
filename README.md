@@ -1,35 +1,36 @@
 # Robust News Classification
 
-Text-only fake/real news classification using the ISOT dataset for training and held-out test files for evaluation.
+Robust fake/real news classification trained on ISOT and evaluated on held-out tests, including cross-dataset WELFake. Baselines use TF-IDF; optional embedding models are provided.
 
 ## Data
-- Training: `data/training/Fake.csv` (fake=1), `data/training/True.csv` (real=0).
+- Training: `data/training/Fake.csv` (1=fake), `data/training/True.csv` (0=real).
 - Tests:
-  - `data/test/fake.csv` (all fake) — used to measure false negatives / fake recall.
-  - `data/test/WELFake_Dataset_sample_1000.csv` (mixed labeled, source labels 0=fake/1=real; mapped to project convention 1=fake/0=real).
+  - `data/test/fake.csv` (all fake) — measures false negatives / fake recall.
+  - `data/test/WELFake_Dataset_sample_10000.csv` (10k mixed labeled) — external cross-dataset eval; labels already aligned to 1=fake/0=real in the sample.
 
 ## Models
-- Baselines: TF-IDF + Logistic Regression, TF-IDF + Linear SVM.
-- Optional: Sentence-embedding classifier (`sentence-transformers`).
+- Baselines: TF-IDF + Logistic Regression; TF-IDF + Linear SVM.
+- Variants: TF-IDF with simple length features (title/text chars); embedding + LogReg (text-only and with lengths). Length features did not improve results.
+- Device: Embedding loader auto-selects CUDA → MPS → CPU; transformer utilities remain but are not used in the notebook (runtime too long).
 
 ## Notebook
 - `notebooks/08_main_experiments.ipynb`
   - Trains on full ISOT.
-  - Evaluates fake-only test (reports fake recall / false negatives).
-  - Evaluates WELFake (Macro-F1, ROC-AUC, PR-AUC, confusion matrix).
-  - Embeddings section runs if `sentence-transformers` and model weights are available.
+  - Evaluates fake-only test (fake recall / false negatives).
+  - Evaluates WELFake 10k (Macro-F1, ROC-AUC, PR-AUC, confusion).
+  - Embedding sections run if `sentence-transformers` weights are available; transformers removed from the main flow for runtime.
 
 ## Running
-1. Create/activate a virtual env (example): `python3 -m venv .venv && source .venv/bin/activate`
-2. Install deps (example): `pip install --upgrade pip jupyter nbconvert scikit-learn pandas numpy sentence-transformers`
-3. From repo root, execute the notebook (will time out without Jupyter):
+1. Create/activate env: `python3 -m venv .venv && source .venv/bin/activate`
+2. Install deps: `pip install -r requirements.txt`
+3. Execute notebook (headless example):
    ```
    jupyter nbconvert --to notebook --execute notebooks/08_main_experiments.ipynb --output notebooks/08_main_experiments_executed.ipynb
    ```
-4. If embeddings aren’t available, expect that section to fail; you can skip or guard it. If you see `huggingface/tokenizers` fork warnings, set `TOKENIZERS_PARALLELISM=false`.
+4. If skipping embeddings, you may stop before those cells. For `huggingface/tokenizers` fork warnings, set `TOKENIZERS_PARALLELISM=false`.
 
 ## Notes
-- Label convention: project uses 1=fake, 0=real; WELFake source labels are flipped and remapped in the notebook.
-- Topic-holdout split is no longer used due to single-class test issues; final flow is full-train + held-out tests above.
-- Cross-dataset findings (ISOT → WELFake): models train well on ISOT but perform near-random on WELFake (macro-F1 ≈ 0.14–0.18; embeddings only slightly better). Likely domain/style mismatch; needs further adaptation and preprocessing checks.
-- Git hygiene: `.venv/` and other accidental env folders are ignored; keep envs untracked.
+- Label convention: 1=fake, 0=real across datasets.
+- Topic-holdout split was dropped; final flow is full-train + held-out fake-only + WELFake 10k.
+- Current results (ISOT → WELFake 10k): TF-IDF LogReg macro-F1 ~0.831 (ROC-AUC ~0.905); TF-IDF SVM similar; fake-only recall up to ~0.947. Embeddings trail; length features hurt recall. Domain/style mismatch remains the main limitation.
+- `.venv/` and other env folders should remain untracked.
